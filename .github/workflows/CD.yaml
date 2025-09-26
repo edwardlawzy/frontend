@@ -41,6 +41,10 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
+
+      - name: Create Task Definition File
+        run: |
+          echo '${{ vars.ECS_TASK_DEFINITION_JSON }}' > ${{ env.LOCAL_TASK_DEFINITION_FILE }}
         
       - name: Determine Final Image Tag to Deploy
         id: final-tag
@@ -54,7 +58,7 @@ jobs:
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: ${{ vars.ECS_TASK_DEFINITION_JSON }}
+          task-definition: ${{ env.LOCAL_TASK_DEFINITION_FILE }}
           container-name: frontend
           image: ${{ steps.get-tag.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.FINAL_TAG }}
 
