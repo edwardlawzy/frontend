@@ -1,8 +1,25 @@
 name: 'CI - Build, Test & Push to ECR'
-'on':
-  push:
-    branches:
-      - feat_*
+#'on':
+#  push:
+#    branches:
+#      - feat_*
+on:
+  workflow_dispatch:
+    inputs:
+      service_name:
+        description: 'Service to deploy'
+        required: true
+        default: 'frontend-service'
+      image_tag:
+        description: 'Image tag to deploy'
+        required: true
+        default: 'v1.0'
+      target_branch:
+        description: 'Branch to run the workflow on'
+        required: true
+        default: 'feat_*'
+        type: string
+        
 env:
   AWS_REGION: us-east-1
   SERVICE_NAME: frontend-service
