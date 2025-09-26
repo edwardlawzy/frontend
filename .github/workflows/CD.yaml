@@ -8,23 +8,23 @@ env:
   ECS_TASK_DEFINITION: task-definition.json
 
 on:
-#  workflow_run:
-#    workflows: ["CI - Build, Test & Push to ECR"]
-#    types:
-#      - completed
-#    branches:
-#      - 'feat_*'
+  workflow_run:
+    workflows: ["CI - Build, Test & Push to ECR"]
+    types:
+      - completed
+    branches:
+      - 'feat_*'
 
   workflow_dispatch:
-#    inputs:
-#      service_name:
-#        description: 'Service to deploy (e.g., backend-service)'
-#        required: true
-#        default: 'frontend-service'
-#      image_tag:
-#        description: 'Image tag to deploy (e.g., latest, SHA, or feat_branch_name)'
-#        required: true
-#        default: 'v1.0'
+    inputs:
+      service_name:
+        description: 'Service to deploy (e.g., backend-service)'
+        required: true
+        default: 'frontend-service'
+      image_tag:
+        description: 'Image tag to deploy (e.g., latest, SHA, or feat_branch_name)'
+        required: true
+        default: 'v1.0'
 jobs:
   deploy:
     name: Deploy to ECS
