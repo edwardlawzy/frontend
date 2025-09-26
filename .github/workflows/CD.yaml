@@ -24,7 +24,7 @@ on:
       image_tag:
         description: 'Image tag to deploy (e.g., latest, SHA, or feat_branch_name)'
         required: true
-        default: '${{ vars.FEAT_TAG }}'
+        default: 'v1.0'
 jobs:
   deploy:
     name: Deploy to ECS
