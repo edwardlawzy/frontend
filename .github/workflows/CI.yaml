@@ -1,0 +1,77 @@
+name: CI - Build, Test & Push to ECR
+on:
+  push:
+    branches:
+      - 'feat_*'
+
+env:
+  AWS_REGION: us-east-1
+  SERVICE_NAME: frontend-service
+
+jobs:
+  lint_test:
+    name: Lint & Run Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js (for linting)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '21'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Linters
+        run: npm run lint
+
+      - name: Run Tests
+        run: npm run test
+
+
+  build_and_push:
+    name: Build & Push Docker Image
+    needs: lint_test # Ensure linting and tests pass before building/pushing
+    runs-on: ubuntu-latest
+    
+    # Define image tag based on the source of the push
+    # If main, use the short SHA. If a feat branch, use the branch name.
+    outputs:
+      image_tag: ${{ steps.set-tag.outputs.tag }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          # IMPORTANT: Replace these with your actual GitHub Secrets
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Determine Image Tag
+        id: set-tag
+        run: |
+            BRANCH_NAME=$(echo ${{ github.ref }} | sed 's/refs\/heads\///g')
+            echo "tag=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          
+      - name: Build, Tag, and Push image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ steps.set-tag.outputs.tag }}
+        run: |
+          # Build the Docker image
+          docker build -t $ECR_REGISTRY/${{secrets.ECR_REPOSITORY}}:$IMAGE_TAG .
+          
+          # Push the Docker image to ECR
+          docker push $ECR_REGISTRY/${{secrets.ECR_REPOSITORY}}:$IMAGE_TAG
+          echo "Successfully pushed image with tag: $IMAGE_TAG"
