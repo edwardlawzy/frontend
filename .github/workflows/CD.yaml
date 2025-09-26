@@ -1,0 +1,67 @@
+name: CD - Deploy to ECS
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: ${{secrets.ECR_REPOSITORY}}
+  ECS_CLUSTER: edward-ecs-cluster
+  ECS_SERVICE: edward-ecs-service
+  ECS_TASK_DEFINITION: task-definition.json
+
+on:
+  workflow_run:
+    workflows: ["CI - Build, Test & Push to ECR"]
+    types:
+      - completed
+    branches:
+      - 'feat_*'
+
+  workflow_dispatch:
+    inputs:
+      service_name:
+        description: 'Service to deploy (e.g., backend-service)'
+        required: true
+        default: 'frontend-service'
+      image_tag:
+        description: 'Image tag to deploy (e.g., latest, SHA, or feat_branch_name)'
+        required: true
+        default: 'v1.0'
+jobs:
+  deploy:
+    name: Deploy to ECS
+    if: |
+      github.event_name == 'workflow_dispatch' || 
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+      
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+        
+      - name: Determine Final Image Tag to Deploy
+        id: final-tag
+        run: |
+          # Use user input tag for manual dispatch, otherwise use the tag determined from CI
+          TAG=${{ github.event_name == 'workflow_dispatch' && github.event.inputs.image_tag || steps.get-tag.outputs.tag }}
+          echo "FINAL_TAG=$TAG" >> $GITHUB_ENV
+          echo "Deploying image with tag: $TAG"
+        
+      - name: Fill in the new image tag in the Task Definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ vars.ECS_TASK_DEFINITION_JSON }}
+          container-name: ${{ env.SERVICE_NAME }}
+          image: ${{ steps.get-tag.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.FINAL_TAG }}
+
+      - name: Deploy new Task Definition to ECS Service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
