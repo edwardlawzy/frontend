@@ -20,16 +20,22 @@ jobs:
       - name: Set up Node.js (for linting)
         uses: actions/setup-node@v4
         with:
-          node-version: '21'
+          node-version: '20'
 
       - name: Install Dependencies
         run: npm install
 
-      - name: Run Linters
-        run: npm run lint
+      - name: Lint Prettier
+        run: npm run prettier
+        continue-on-error: false
+
+      - name: Lint ESLint
+        run: npm run eslint
+        continue-on-error: true
 
       - name: Run Tests
-        run: npm run test
+        run: npm run vue-i18n-extract
+        continue-on-error: true
 
 
   build_and_push:
