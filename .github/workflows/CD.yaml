@@ -8,14 +8,14 @@ env:
   ECS_TASK_DEFINITION: task-definition.json
 
 on:
-  workflow_run:
-    workflows: ["CI - Build, Test & Push to ECR"]
-    types:
-      - completed
-    branches:
-      - 'feat_*'
+#  workflow_run:
+#    workflows: ["CI - Build, Test & Push to ECR"]
+#    types:
+#      - completed
+#    branches:
+#      - 'feat_*'
 
-#  workflow_dispatch:
+  workflow_dispatch:
 #    inputs:
 #      service_name:
 #        description: 'Service to deploy (e.g., backend-service)'
