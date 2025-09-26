@@ -55,7 +55,7 @@ jobs:
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: ${{ vars.ECS_TASK_DEFINITION_JSON }}
-          container-name: ${{ env.SERVICE_NAME }}
+          container-name: frontend
           image: ${{ steps.get-tag.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.FINAL_TAG }}
 
       - name: Deploy new Task Definition to ECS Service
