@@ -43,8 +43,10 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Create Task Definition File
+        #run: |
+        #  echo '${{ vars.ECS_TASK_DEFINITION_JSON }}' > ${{ env.LOCAL_TASK_DEFINITION_FILE }}
         run: |
-          echo '${{ vars.ECS_TASK_DEFINITION_JSON }}' > ${{ env.LOCAL_TASK_DEFINITION_FILE }}
+          aws ecs describe-task-definition --task-definition edward-task-definition --query 'taskDefinition' > edward-task-definition.json
         
       - name: Determine Final Image Tag to Deploy
         id: final-tag
@@ -58,7 +60,7 @@ jobs:
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: ${{ env.LOCAL_TASK_DEFINITION_FILE }}
+          task-definition: edward-task-definition.json
           container-name: frontend
           image: ${{ steps.get-tag.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.FINAL_TAG }}
 
