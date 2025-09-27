@@ -3,22 +3,17 @@ name: 'CI - Build, Test & Push to ECR'
   push:
     branches:
       - feat_*
-#on:
-#  workflow_dispatch:
-#    inputs:
-#      service_name:
-#        description: 'Service to deploy'
-#        required: true
-#        default: 'frontend-service'
-#      image_tag:
-#        description: 'Image tag to deploy'
-#        required: true
-#        default: 'v1.0'
-#      target_branch:
-#        description: 'Branch to run the workflow on'
-#        required: true
-#        default: 'feat_*'
-#        type: string
+  workflow_dispatch:
+    inputs:
+      service_name:
+        description: 'Service to deploy'
+        required: true
+        default: 'frontend-service'
+      image_tag:
+        description: 'Image tag to deploy'
+        required: true
+        default: 'v1.0'
+
         
 env:
   AWS_REGION: us-east-1
@@ -39,8 +34,8 @@ jobs:
       - name: Lint Prettier
         run: npm run prettier
         continue-on-error: true
-      - name: Lint ESLint
-        run: npm run eslint
+      - name: Lint Lint
+        run: npm run lint
         continue-on-error: true
       - name: Run Tests
         run: npm run vue-i18n-extract
