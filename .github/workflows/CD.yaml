@@ -58,14 +58,14 @@ jobs:
         
       - name: Fill in the new image tag in the Task Definition
         id: task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@v2
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: edward-task-definition.json
           container-name: frontend
           image: ${{ steps.get-tag.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.FINAL_TAG }}
 
       - name: Deploy new Task Definition to ECS Service
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: ${{ env.ECS_SERVICE }}
