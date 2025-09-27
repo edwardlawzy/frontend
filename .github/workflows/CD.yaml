@@ -18,11 +18,11 @@ on:
   workflow_dispatch:
     inputs:
       service_name:
-        description: 'Service to deploy (e.g., backend-service)'
+        description: 'Service to deploy'
         required: true
         default: 'frontend-service'
       image_tag:
-        description: 'Image tag to deploy (e.g., latest, SHA, or feat_branch_name)'
+        description: 'Image tag to deploy'
         required: true
         default: 'v1.0'
 jobs:
@@ -41,6 +41,10 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
+
+      - name: Create Task Definition File
+        run: |
+          aws ecs describe-task-definition --task-definition edward-task-definition --query 'taskDefinition' > edward-task-definition.json
         
       - name: Determine Final Image Tag to Deploy
         id: final-tag
@@ -54,12 +58,12 @@ jobs:
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: ${{ vars.ECS_TASK_DEFINITION_JSON }}
-          container-name: ${{ env.SERVICE_NAME }}
-          image: ${{ steps.get-tag.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.FINAL_TAG }}
+          task-definition: edward-task-definition.json
+          container-name: frontend
+          image: ${{ env.ECR_REPOSITORY_URI }}:${{ env.FINAL_TAG }}
 
       - name: Deploy new Task Definition to ECS Service
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: ${{ env.ECS_SERVICE }}
