@@ -60,8 +60,7 @@ jobs:
         with:
           task-definition: edward-task-definition.json
           container-name: frontend
-          image: ${{ env.ECR_REPOSITORY }}:${{ env.FINAL_TAG }}
-          # ${{ steps.get-tag.outputs.registry }}/
+          image: ${{ env.ECR_REPOSITORY_URI }}:${{ env.FINAL_TAG }}
 
       - name: Deploy new Task Definition to ECS Service
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
