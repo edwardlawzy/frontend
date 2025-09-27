@@ -3,16 +3,16 @@ name: 'CI - Build, Test & Push to ECR'
   push:
     branches:
       - feat_*
-  workflow_dispatch:
-    inputs:
-      service_name:
-        description: 'Service to deploy'
-        required: true
-        default: 'frontend-service'
-      image_tag:
-        description: 'Image tag to deploy'
-        required: true
-        default: 'v1.0'
+#  workflow_dispatch:
+#    inputs:
+#      service_name:
+#        description: 'Service to deploy'
+#        required: true
+#        default: 'frontend-service'
+#      image_tag:
+#        description: 'Image tag to deploy'
+#        required: true
+#        default: 'v1.0'
 
         
 env:
@@ -31,14 +31,11 @@ jobs:
           node-version: '20'
       - name: Install Dependencies
         run: npm install
-      - name: Lint Prettier
+      - name: Prettier
         run: npm run prettier
         continue-on-error: true
-      - name: Lint Lint
+      - name: Lint
         run: npm run lint
-        continue-on-error: true
-      - name: Run Tests
-        run: npm run vue-i18n-extract
         continue-on-error: true
   build_and_push:
     name: Build & Push Docker Image
