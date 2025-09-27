@@ -2,7 +2,7 @@ name: CD - Deploy to ECS
 
 env:
   AWS_REGION: us-east-1
-  ECR_REPOSITORY: ${{secrets.ECR_REPOSITORY}}
+  ECR_REPOSITORY: ${{secrets.ECR_REPOSITORY_URI}}
   ECS_CLUSTER: edward-ecs-cluster
   ECS_SERVICE: edward-ecs-service
   ECS_TASK_DEFINITION: task-definition.json
@@ -60,7 +60,7 @@ jobs:
         with:
           task-definition: edward-task-definition.json
           container-name: frontend
-          image: ${{ env.ECR_REPOSITORY_URI }}:${{ env.FINAL_TAG }}
+          image: ${{ env.ECR_REPOSITORY }}:${{ env.FINAL_TAG }}
 
       - name: Deploy new Task Definition to ECS Service
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
